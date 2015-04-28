@@ -2,12 +2,12 @@
 
 require_once "sqlConfig.php";
 	
+
+function getStart()
+{
+$sql = getSql();
 	
- function getData()
- {
-	$sql = getSql();
-	
-	$res = sqlsrv_query($sql, "SELECT  * FROM clientLocation where  floor>=1.5 order by clientid, timestamp"); //clientid = 529 and
+	$res = sqlsrv_query($sql, "SELECT TOP 1 tfrom FROM clientLocation where   1=1 order by tfrom"); //eventually we will filter by tfrom and tto
 	if( $res === false) {
 		die( print_r( sqlsrv_errors(), true) );
 	}
@@ -19,7 +19,31 @@ require_once "sqlConfig.php";
 	}
 	
 	sqlsrv_free_stmt($res);
-	return $table;
+	
+	
+	return $table[0]['tfrom']->getTimestamp();
+
+}
+	
+ function getPaths($start = 0, $end = 0)
+ {
+	$sql = getSql();
+	
+	$res = sqlsrv_query($sql, "SELECT  * FROM clientLocation where 1=1 and clientID in (select clientID from clientLocation where 1=1 group by clientID having count(id) > 5)  order by clientid, tfrom"); //eventually we will filter by tfrom and tto
+	if( $res === false) {
+		die( print_r( sqlsrv_errors(), true) );
+	}
+	
+	$table = array();
+	while( $row = sqlsrv_fetch_array( $res, SQLSRV_FETCH_ASSOC) ) 
+	{
+		array_push($table, $row);
+	}
+	
+	sqlsrv_free_stmt($res);
+	
+	
+	return setupPaths($table);
 }
 
 
@@ -55,9 +79,10 @@ function setupPaths($table)
 		
 		
 		$point = array();
-		$point['x'] = $row['X'];
-		$point['y'] = $row['Y'];
-		$point['time'] = $row['timestamp']->getTimestamp();
+		$point['AP1'] = $row['AP1'];
+		$point['AP2'] = $row['AP2'];
+		$point['start'] = $row['tfrom']->getTimestamp();
+		$point['end'] = $row['tto']->getTimestamp();
 		
 		//$startTime = min($startTime, $point['time']); //Get first timestamp
 		
@@ -71,22 +96,105 @@ function setupPaths($table)
 	
 }
 
-function getStart($table)
+function getRoutes()
 {
-	$s = time();
-	foreach($table as $row)
-	{
-		$s=min($s,$row['timestamp']->getTimestamp());
+	$sql = getSql();
+	
+	$res = sqlsrv_query($sql, "SELECT  * FROM APRoutes where 1=1");
+	if( $res === false) {
+		die( print_r( sqlsrv_errors(), true) );
 	}
-	return $s;
+	
+	$table = array();
+	while( $row = sqlsrv_fetch_array( $res, SQLSRV_FETCH_ASSOC) ) 
+	{
+	
+		$rdata = array();	
+		array_push($table, $row);
+	}
+	
+	sqlsrv_free_stmt($res);
+	
+	return $table;
 
 }
 
+
+
 //var_dump($paths);
 
+function addPaths($paths, $routes, $aps, $start=0)
+{
+	foreach($paths as $id=>$p)
+	{
+		print "////Routes for client #$id\n\n";
+		
+		$r = 5;
+		$cx = 0;
+		$cy = 0;
+		
+		
+		//var_dump($p);
+		
+		$end = -1;
+		
+		print "var client$id = wifi.append('circle').attr('cx',$cx).attr('cy',$cy).attr('r',$r).style('fill','rgba(151,0,255,0.5)');\n\n";
+		
+			foreach($p as $sid=>$sp)
+			{
+				
+				$route = null;
+				$rev = 0;
+				$ap1 = $sp['AP1'];
+				$ap2 = $sp['AP2'];
+				
+				foreach($routes as $r) //Find the route
+				{
+					if($r['AP1'] == $ap1 && $r['AP2'] == $ap2)
+					{
+						$route = $r['pathID'];
+						break;
+					}
+					else if($r['AP1'] == $ap2 && $r['AP2'] == $ap1) //Reversed mode
+					{
+						$route = $r['pathID'];
+						$rev = 1;
+						break;
+					}
+				}
+				
+
+					if($end == -1) $end = $sp['end'];
+					$end = max($end, $sp['end']);
+					
+					
+					
+					$delay = ($sp['start'] - $start);
+					$dur = ($sp['end'] - $sp['start']);
+					
+				if($route != null)
+				{
+					//print "client$id.transition().duration($delay).each('end', function(){d3.select(this).transition().duration($dur).ease('linear').attrTween('transform',moveClient(svg.select('path#$route').node(),$rev))});\n";
+					print "client$id.transition().delay($delay).duration($dur).ease('linear').attrTween('transform',moveClient(svg.select('path#$route').node(),$rev));\n";
+				}
+				else
+				{
+					//Fall back if no route found
+					$xpos = $aps[$ap2]['x'];
+					$ypos = $aps[$ap2]['y'];
+					//print "client$id.transition().delay($delay + $dur).duration(0).attr('transform','translate($xpos,$ypos)');\n";
+				}
+				
+			}
+		$delay = ($end - $start);
+		print "client$id.transition().delay($delay).style('opacity',0)";
+		
+		print "\n////End Routes for client #$id\n\n";
+	}
+}
+/*
 function addPaths($paths, $starttime=0)
 {
-	//Setup SVG functions
 	foreach($paths as $id=>$p)
 	{
 		
@@ -145,7 +253,7 @@ function addPaths($paths, $starttime=0)
 	
 	}
 }
-
+*/
 
 function addPoints($table)
 {
