@@ -1,6 +1,7 @@
 <?php
 
 require_once "sqlConfig.php";
+require_once "config.php";
 	
 
 function getStart()
@@ -29,7 +30,10 @@ $sql = getSql();
  {
 	$sql = getSql();
 	
-	$res = sqlsrv_query($sql, "SELECT  * FROM clientLocation where 1=1 and clientID in (select clientID from clientLocation where 1=1 group by clientID having count(id) > 5)  order by clientid, tfrom"); //eventually we will filter by tfrom and tto
+	$wStart = date('Y-m-d H:i:s',$start);
+	$wEnd = date('Y-m-d H:i:s',$end);
+	
+	$res = sqlsrv_query($sql, "SELECT  * FROM clientLocation where 1=1 and clientID in (select clientID from clientLocation group by clientID having count(id) > 1) and tfrom >= '$wStart' and tto <= '$wEnd'  order by clientid, tfrom"); //eventually we will filter by tfrom and tto
 	if( $res === false) {
 		die( print_r( sqlsrv_errors(), true) );
 	}
@@ -123,8 +127,17 @@ function getRoutes()
 
 //var_dump($paths);
 
-function addPaths($paths, $routes, $aps, $start=0)
+function addPaths($start=0, $end=0)
 {
+	$routes = getRoutes();
+	$aps = getAPs($start, $end);
+	$paths = getPaths($start, $end);
+	
+	
+	$sstart = scaleTime($start);
+	$send =  scaleTime($start);
+	
+	
 	foreach($paths as $id=>$p)
 	{
 		print "////Routes for client #$id\n\n";
@@ -136,9 +149,13 @@ function addPaths($paths, $routes, $aps, $start=0)
 		
 		//var_dump($p);
 		
-		$end = -1;
 		
-		print "var client$id = wifi.append('circle').attr('cx',$cx).attr('cy',$cy).attr('r',$r).style('fill','rgba(151,0,255,0.5)');\n\n";
+		$iend = -1;
+		
+		print "var client$id = wifi.append('circle').attr('cx',$cx).attr('cy',$cy).attr('r',$r).style('fill','rgba(151,0,255,0.5)').attr('id','client$id').attr('class','client').style('opacity',1);\n\n";
+		
+		
+		
 		
 			foreach($p as $sid=>$sp)
 			{
@@ -163,97 +180,59 @@ function addPaths($paths, $routes, $aps, $start=0)
 					}
 				}
 				
-
-					if($end == -1) $end = $sp['end'];
-					$end = max($end, $sp['end']);
+					
+					if($iend == -1) $iend = $sp['end'];
+					$iend = max($iend, $sp['end']);
 					
 					
 					
-					$delay = ($sp['start'] - $start);
-					$dur = ($sp['end'] - $sp['start']);
+					//print "//" . $sp['start'] . " - " .$start . " = " . ($sp['start'] - $start) . " \n";
+					$delay = scaleTime($sp['start'] - $start);
+					$dur = scaleTime($sp['end'] - $sp['start']);
+					
+					//$opac = 1;
+					
+					
 					
 				if($route != null)
 				{
-					//print "client$id.transition().duration($delay).each('end', function(){d3.select(this).transition().duration($dur).ease('linear').attrTween('transform',moveClient(svg.select('path#$route').node(),$rev))});\n";
-					print "client$id.transition().delay($delay).duration($dur).ease('linear').attrTween('transform',moveClient(svg.select('path#$route').node(),$rev));\n";
+
+					if(!isLongTime($dur))
+					{
+						print "client$id.transition().delay($delay).duration($dur).ease('linear').attrTween('transform',moveClient(svg.select('path#$route').node(),$rev, $dur));\n";
+					}
+					else
+					{
+						print "client$id.transition().delay($delay).style('opacity',0).duration(0);\n";
+						print "client$id.transition().delay($delay + $dur).style('opacity',1).duration(0);\n";
+					}
 				}
 				else
 				{
-					//Fall back if no route found
-					$xpos = $aps[$ap2]['x'];
-					$ypos = $aps[$ap2]['y'];
-					//print "client$id.transition().delay($delay + $dur).duration(0).attr('transform','translate($xpos,$ypos)');\n";
+					if(!isLongTime($dur))
+					{
+						//Fall back if no route found
+						$xpos = $aps[$ap2]['x'];
+						$ypos = $aps[$ap2]['y'];
+						print "client$id.transition().delay($delay + $dur).duration(0).attr('transform','translate($xpos,$ypos)');\n";
+					}
+					else
+					{
+						print "client$id.transition().delay($delay).style('opacity',0).duration(0);\n";
+						print "client$id.transition().delay($delay + $dur).style('opacity',1).duration(0);\n";
+					}
 				}
 				
+				
+				
 			}
-		$delay = ($end - $start);
-		print "client$id.transition().delay($delay).style('opacity',0)";
+		$delay = scaleTime($iend - $start);
+		print "client$id.transition().delay($delay).style('opacity',0);\n";
 		
 		print "\n////End Routes for client #$id\n\n";
 	}
 }
-/*
-function addPaths($paths, $starttime=0)
-{
-	foreach($paths as $id=>$p)
-	{
-		
-		//Setup path
-		$pathData = "var pathData" . $id . " = [ ";
-		
-		//setup timestamps
-		$timeData = "var timeData = [";
-		
-		//Create circle at correct time.
 
-		$r = 5;
-		$cx = 0;
-		$cy = 0;
-		
-		$circle = "var client$id = wifi.append('circle').attr('cx',$cx).attr('cy',$cy).attr('r',$r).style('fill','rgba(151,0,255,0.5)');\n\n";
-		
-		for($i = 0; $i < count($p); $i++)
-		{
-			$pt = $p[$i];
-			$t = 0;
-			if($i < count($p) - 1)
-			{
-				$ptn = $p[$i + 1];
-				$t = $ptn['time'] - $pt['time']; //get time between points
-			}
-			
-			$pathData .= "{ 'x' : " . $pt["x"] . ", 'y' : " . $pt["y"] . "},";
-			
-			$timeData .= "$t,";
-		}
-		
-		$scale = 5000;
-		$dur = ($p[count($p) - 1]['time'] -  $p[0]['time'])*(1000/$scale);
-		
-		
-		$pathData = trim($pathData,',');
-		$pathData .= "];\n\n";
-		
-		$timeData = trim($timeData,',');
-		$timeData .= "];\n\n";
-		
-		print $pathData;
-		
-		print "var path$id  = wifi.append('path').attr('d', lineFunction(pathData$id)).attr('stroke', 'purple').attr('stroke-width',0).attr('fill','none');";
-		
-		print $circle;
-		
-		$delay = $p[0]['time'] - $starttime;
-		
-		$transistion = "client$id.transition().duration($delay).each('end',function(){ d3.select(this).transition().duration($dur).ease('linear').attrTween('transform',moveClient(path$id.node())).each('end',function() { d3.select(this).style('opacity',0)}) } ) ;\n\n";
-		//$transistion = "client$id.transition().duration(1000).each('end',function(d, i) { \n $timeData this.transition().duration(1000).ease('linear').attrTween('transform',moveClient(path$id.node())) });\n\n";
-		
-		print $transistion;
-		//print $timeData;
-	
-	}
-}
-*/
 
 function addPoints($table)
 {
@@ -268,4 +247,103 @@ function addPoints($table)
 		print "wifi.append('circle').attr('cx',$cx).attr('cy',$cy).attr('r',$r).style('fill','rgba(255,0,255,0.2)');\n\n";
 	}
 }
+
+
+	
+	function getAPs($start = 0, $end = 0)
+	{
+	
+		$wStart = date('Y-m-d H:i:s',$start);
+		$wEnd = date('Y-m-d H:i:s',$end);
+	
+		$query = "select a.id apid, c.timestamp, c.clients, a.apname, a.x, a.y from clientsAtAP c left join APs a on (a.id = c.apID) where a.x is not null and c.timestamp between '$wStart' and '$wEnd' order by a.apname, c.timestamp";
+		
+		$sql = getSql();
+		
+		$res = sqlsrv_query($sql, $query);
+		if( $res === false) {
+			die( print_r( sqlsrv_errors(), true) );
+		}
+		
+		$table = array();
+		while( $row = sqlsrv_fetch_array( $res, SQLSRV_FETCH_ASSOC) ) 
+		{
+			array_push($table, $row);
+		}
+		
+		sqlsrv_free_stmt($res);
+		
+		$apID = -1;
+		$apdata = array();
+
+		
+		foreach($table as $row)
+		{
+			//new AP
+			if($row['apid'] != $apID)
+			{
+				if($apID != -1)
+				{
+					$apdata[$apID]['data'] = $tap;
+					
+				}
+				$tap = array();
+				$apID = $row['apid'];
+				$apdata[$apID]['x'] = $row['x'];
+				$apdata[$apID]['y'] = $row['y'];
+				$apdata[$apID]['name'] = $row['apname'];				
+				
+			}
+			$time = $row['timestamp']->getTimestamp();
+			$tap[intval($time)] = $row['clients'];		
+		
+		}
+		
+		return $apdata;
+	
+	}
+	
+	function addAPs($start = 0, $end = 0)
+	{
+	
+		$data = getAps($start, $end);
+		
+		//Create array to hold APs
+		print "var aps = new Array();\n\n";
+		print "var apBase = new Array();\n\n";
+		//Get ap data
+		print "var apData = " . json_encode ($data) . ";\n\n";
+		
+		$max = 20;
+		
+		foreach($data as $apID=>$ap)
+		{
+				//Get a single AP
+				$r = 20;
+				$x = $ap['x'];
+				$y = $ap['y'];
+				$n = $ap['name'];
+				
+				print "//AP point $n\n\n";
+				
+				print "apBase[$apID] = wifi.append('circle').attr('cx',$x).attr('cy',$y).attr('r',$r).style('fill','rgba(118,238,194,0.1)').attr('name','$n').attr('class','AP');\n";
+				print "aps[$apID]    = wifi.append('circle').attr('cx',$x).attr('cy',$y).attr('r',0).style('fill','rgba(118,238,194,0.25)').attr('name','$n').attr('class','AP');\n\n";
+				
+				if(isset($ap['data']))
+				{
+					$apdata = $ap['data'];
+					foreach($apdata as $t=>$a)
+					{
+						$dur = scaleTime(60*60); //1 hr
+						$delay = scaleTime($t - $start);
+						$nr = ($a/$max)*$r;
+						
+						print "aps[$apID].transition().delay($delay).duration($dur).ease('linear').attr('r',$nr);\n";
+					}
+				}
+				
+				print "\n//End point $n\n\n";
+				
+		}
+	}
 ?>
