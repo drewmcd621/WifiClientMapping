@@ -6,7 +6,7 @@ ini_set("display_errors", 1);
 require_once "wifiPath.php";
 require_once "config.php";
 
-setScale(10*60); //1 min / s
+setScale(1*60); //1 min / s
 $start = strtotime("March 28, 2015 1:00 pm");
 $end = strtotime("March 28, 2015 5:00 pm");
 	
@@ -24,11 +24,19 @@ $end = strtotime("March 28, 2015 5:00 pm");
 		var svg = d3.select("#svg2");
 		var wifi = d3.select("#floor2-ani");
 		
-		var lineFunction = d3.svg.line().x(function(d) { return d.x; }).y(function(d) { return d.y; }).interpolate('linear');
 		
+		var lineFunction = d3.svg.line().x(function(d) { return d.x; }).y(function(d) { return d.y; }).interpolate('linear');
+	
 		var currentTime = getScaledTime(<?php print $start * 1000;?>);
 		var intv = 10;
 		var endTime = getScaledTime(<?php print $end * 1000;?>);
+	
+		function start()
+		{
+			currentTime = getScaledTime(<?php print $start * 1000;?>);
+			endTime = getScaledTime(<?php print $end * 1000;?>);
+		
+		}
 		
 		var timeTick = setInterval(
 		function tick()
@@ -42,6 +50,72 @@ $end = strtotime("March 28, 2015 5:00 pm");
 			
 		}
 		,intv);
+		
+		//isometric('#floor2',1000);
+		displayFloors();
+		
+		function displayFloors()
+		{
+			
+			var floors = ['floorG','floor1','floor2','floor3']
+			for(var i = 0; i < 4; i++)
+			{
+				var floor = d3.select('#' + floors[i]).remove();
+				svg.append('g').attr('id',floors[i] + '-move');
+				
+				d3.select('#' + floors[i] + '-move').append(function() { return floor.node(); });
+				
+				isometric('#' + floors[i]);
+				
+				var y = 70*(4-i) - 170;
+				 d3.select('#' + floors[i] + '-move').attr('transform', ' translate(-75,' + y + ')');
+			}
+		}
+		
+		function changeFloor(flr, dur)
+		{
+			var floors = ['#floorG-move','#floor1-move','#floor2-move','#floor3-move']
+			for(var i = 0; i <= flr; i ++)
+			{
+				var f = d3.select(floors[i]);
+				var y = 70*((flr+1)-i) - 170;
+				f.attr('display',null);
+				f.transition().duration(dur).attr('transform', ' translate(-75,' + y + ')').style('opacity',1);
+				
+				
+			}
+			if(flr < 3)
+			{
+				for(var j = flr + 1; j <= 3; j++)
+				{
+					var f = d3.select(floors[i]);
+					f.transition().duration(dur).style('opacity',0).each('end',function(){ f.attr('display','none');});
+				}
+			
+			}
+		}
+		
+		function isometric(select, dur)
+		{
+			var obj = d3.select(select);
+			
+			var bbox = obj.node().getBBox();
+			
+			var midX = bbox.width / 2.0;
+			var midY = bbox.height / 2.0;
+			
+			var t = obj.attr('transform');
+			//.transition().duration(dur)
+			// matrix(0.707 0.409 -0.707 0.409 0 -0.816)
+			
+			
+			obj.attr("transform", t + "translate(" + midX + "," + midY +")  matrix(0.6 0.4 -0.6 0.4 0 -0.5) translate(" + -1*midX + "," + -1*midY +")");
+			
+			
+		
+		}
+		
+		
 		
 
 		
@@ -183,8 +257,22 @@ $end = strtotime("March 28, 2015 5:00 pm");
 		})
 		;
 		
-
+		var floor = 3;
+		$('#up').click(function()
+		{
+			floor++;
+			if(floor > 3) floor = 3;
+			console.log(floor);
+			changeFloor(floor,1000);
+		});
 		
+		$('#down').click(function()
+		{
+			floor--;
+			if(floor < 0) floor = 0;
+			console.log(floor);
+			changeFloor(floor,1000);
+		});
 		
 		
 		
@@ -202,6 +290,12 @@ $end = strtotime("March 28, 2015 5:00 pm");
 </head>
 	<body>
 	<h3 id='time'></h3>
+	<div id='controls'>
+		<button id='up'>Up</button>
+		<button id='down'>Down</button>
+	</div>
+	<div id ='svgHolder'>
 	<?php echo file_get_contents('map.svg'); ?>
+	</div>
 	</body>
 </html>
