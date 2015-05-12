@@ -25,10 +25,57 @@
    <path id="floorG-lib" d="m200.85 464.43h-108.39c-0.495 9.9605-5.1766 16.876-17.348 18.345-7.7505-1.5232-15.795-2.3599-17.348-18.345h-56.63v-51.047h35.095v-43.295h-10.294v-33.39l10.294 0.086v-43.042h-34.297v-53.745h95.678v51.88h130.47v149.04h-27.231z" display="inline" fill="#a9a9a9"/>
    <path id="floorG-cma" d="m741.79 292.33h-193.41v-49.033h193.63z" display="inline" fill="#ff8719"/>
   </g>
+  <g id="floorG-walls" stroke="#475569" stroke-width="2" fill="none">
+   <path id="path4477" d="m397.14 359.18h-51.617v32.589h-34.885v-34.649h-69.259l0.00043 149.91h27.362v7.6229h-27.577v41.345h-14.673" stroke-linecap="square"/>
+   <path id="path4477-5" d="m397.26 343.77h-51.751v-36h-35.875v37.375h-68.26v-231.98h116.01v-52.901h13.25v-10.875h-60.626v11.125h24.5v27h11.625v-27.375" stroke-linecap="square"/>
+   <g>
+    <path id="path4499" d="m334.41 87.092v12.551h-191.72v-47.111"/>
+    <path id="path4503" d="m133.5 52.178v60.812h97.051v179.4h-3.7947v205.94h-25.75"/>
+    <path id="path4507" d="m549.26 290.14v-31.75h27.25v-6.5001h65.001"/>
+    <path id="path4511" d="m629.9 252.29v38.538"/>
+    <path id="path4515" d="m650.05 251.76h23.512"/>
+    <path id="path4519" d="m684.52 290.48v-49.498h-117.91v-8.6621h-17.855v8.4854h-10.607v-7.7782h-12.905"/>
+   </g>
+  </g>
   <g id="floorG-outerwall">
    <path id="floorG-outline" d="m429.2 290.83h-31.923v119.04h27.19s-0.0275 50.377 0 53.973h-88.635v35.444h42.581v52.164l-64.896 0.4047c0 30.602-21.5 46.677-43.19 47.035-21.689 0.3579-43.749-12.961-43.749-47.035h-66.999v-53.992h41.429v-34.947h-108.03c0 10.466-8.279 17.741-18.358 17.714-10.079-0.028-16.338-7.2759-16.338-17.714h-56.778v-51.047h35.242v-43.295h-10.294v-33.39l10.294 0.086v-43.042h-35.242v-52.171h17.695v-129.29h-17.695v-61.416h34.046v-47.856h86.54v51.047h174.28v-51.047h88.534v48.654h356.69l0.7142 240.67h-216.63v-176.46h-128.4v124.81h31.923z" stroke="#475569" stroke-width="3" fill="none"/>
   </g>
+  <g id="floorG-enter">
+   <g id="g4454">
+    <rect id="rect4433-8" height="13.25" width="21.5" y="344.77" x="386.01" fill="#8de88d"/>
+    <g font-family="sans-serif" fill="#000000">
+     <text id="text4450" style="word-spacing:0px;letter-spacing:0px" line-height="125%" font-size="40px" y="354.86652" x="411.26038" xml:space="preserve"><tspan id="tspan4452" font-size="10px" y="354.86652" x="411.26038">Portal</tspan></text>
+     <text id="text4459" style="word-spacing:0px;letter-spacing:0px" xml:space="preserve" font-size="10px" y="278.63126" x="482.81607" line-height="125%"><tspan id="tspan4461" x="482.81607" y="278.63126"/></text>
+     <text id="text4463" style="word-spacing:0px;letter-spacing:0px" xml:space="preserve" font-size="40px" y="276.15634" x="480.34113" line-height="125%"><tspan id="tspan4465" x="480.34113" y="276.15634"/></text>
+    </g>
+   </g>
+   <g id="g4471">
+    <rect id="rect4433" height="16.5" width="21.5" y="266.64" x="514.76" fill="#8de88d"/>
+    <text id="text4467" style="word-spacing:0px;letter-spacing:0px" line-height="125%" font-size="40px" y="277.68561" x="461.42584" font-family="sans-serif" xml:space="preserve" fill="#000000"><tspan id="tspan4469" font-size="10px" y="277.68561" x="461.42584">Courtyard</tspan></text>
+   </g>
+  </g>
 
+  <g id="floorG-wifi" display="none">
+   <g stroke-linejoin="round" stroke-dashoffset="0.6" stroke="#475569" stroke-linecap="square" stroke-width=".40489" fill="#8de88d">
+    <ellipse id="Portal" rx=".15674" ry=".24513" cy="348.66" cx="383.14"/>
+    <ellipse id="CME" rx=".15674" ry=".24513" cy="349.14" cx="277.76" display="inline"/>
+    <ellipse id="B_L-Hall" rx=".15674" ry=".24513" cy="246.28" cx="235.5" display="inline"/>
+    <ellipse id="Conf" rx=".15674" ry=".24513" cy="101.15" cx="101.15" display="inline"/>
+    <ellipse id="AOTA" rx=".15674" ry=".24513" cy="83.141" cx="507.76" display="inline"/>
+    <ellipse id="CMATheater" rx=".15674" ry=".24513" cy="278.14" cx="691.76" display="inline"/>
+    <ellipse id="Fossil" rx=".15674" ry=".24513" cy="507.02" cx="201.63" display="inline"/>
+   </g>
+   <g stroke="#000" stroke-width="1px" fill="none">
+    <path id="PortaltoCME" d="m277.51 349.39s179.35-3.5172 188.13 1.5178c8.7756 5.0349 12.581 17.347 12.581 17.347"/>
+    <path id="CMEtoHall" d="m276.26 349.64s-31.649 1.7974-36.75-0.75001c-5.1018-2.5474-4-102.75-4-102.75"/>
+    <path id="CMEtoFF" d="m278.01 348.89s-37.497-1.4046-42 2.25c-4.5034 3.6546 3.9246 146.66-4.5 154.5-8.4246 7.8463-31.5 6.2501-31.5 6.2501"/>
+    <path id="FFtoHall" d="m197.85 507.91s28.255 3.9558 33.234 0.70711c4.9794-3.2487 2.1213-262.69 2.1213-262.69"/>
+    <path id="HalltoGS" d="m235.26 245.89s-3.9822-135.63 2.5-139c6.4822-3.3724 108.3 6.2039 113.75-0.75001 5.4552-6.9539 1.554-49.936-1.75-51.751-3.304-1.814-8.4034-0.51922-11 1.75-1.1734 1.0254 0.25 15.25 0.25 15.25"/>
+    <path id="AOTAtoCMAT" d="m535.01 262.14s9.015-8.8631 15.5-11.5c6.4851-2.637 24.437-3.7006 40-4.5 15.564-0.79943 46.307-1.6179 52.501 2.75 6.1935 4.368 12.75 23.5 12.75 23.5"/>
+    <path id="PortaltoAOTA" d="m477.87 368.61s-5.4089-72.627 7.7782-86.975 39.663-1.4926 47.023-8.1318c7.3603-6.6392 3.182-11.314 3.182-11.314"/>
+    <path id="AOTAtoHF" d="m535.5 260.78-3.182-27.931"/>
+   </g>
+  </g>
  </g>
  <g id="floor1" transform="translate(49.994 50.725)">
   <g id="g4656" opacity="0">
@@ -330,6 +377,7 @@
   <g id="floor3-outerwall">
    <path id="floor3-outline" d="m92.224 462.93c0 10.466-8.279 17.741-18.358 17.714-10.079-0.028-16.338-7.2759-16.338-17.714h-56.02v-51.047h34.485v-119.64h-34.485v-51.047h16.937v-128.38h-16.937v-63.165l33.288-0.282v-24.622h86.54v27.813h174.28v-27.813h88.534v25.42h24.826v63.993h-11.617v125.91h26.022v51.091h-25.966c0.0001 20.949 0.028 84.313 0.095 118.72h27.332s-0.027 50.377 0 53.973h-89.762v35.444h42.58v52.164l-64.896 0.4047c0 30.602-21.5 46.677-43.19 47.035-21.69 0.3579-43.749-12.961-43.749-47.035h-66.999v-53.992h41.429v-34.947z" stroke="#475569" stroke-width="3" fill="none"/>
   </g>
+
   <g id="floor3-wifi" display="none">
    <circle id="path4708-9-7" opacity="0.595" cx="388.21" display="inline" cy="322.16" r="2.4749" stroke-width="0" fill="#81fbea"/>
   </g>

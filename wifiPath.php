@@ -137,8 +137,9 @@ function addPaths($start=0, $end=0)
 	$sstart = scaleTime($start);
 	$send =  scaleTime($start);
 	
+	print "var clients = new Array();\n\n\n";
 	
-	foreach($paths as $id=>$p)
+	foreach($paths as $id=>$p) //Go through the clients
 	{
 		print "////Routes for client #$id\n\n";
 		
@@ -152,29 +153,39 @@ function addPaths($start=0, $end=0)
 		
 		$iend = -1;
 		
-		print "var client$id = wifi.append('circle').attr('cx',$cx).attr('cy',$cy).attr('r',$r).style('fill','rgba(151,0,255,0.5)').attr('id','client$id').attr('class','client').style('opacity',1);\n\n";
+		//Create a circle for each client on each floor (makes changing floors easier)
+		print "clients[$id] = new Array();\n\n";
+		print "clients[$id][0] = wifi[0].append('circle').attr('cx',$cx).attr('cy',$cy).attr('r',$r).style('fill','rgba(151,0,255,0.5)').attr('id','client$id').attr('class','client').style('opacity',1);\n";
+		print "clients[$id][1] = wifi[1].append('circle').attr('cx',$cx).attr('cy',$cy).attr('r',$r).style('fill','rgba(151,0,255,0.5)').attr('id','client$id').attr('class','client').style('opacity',1);\n";
+		print "clients[$id][2]= wifi[2].append('circle').attr('cx',$cx).attr('cy',$cy).attr('r',$r).style('fill','rgba(151,0,255,0.5)').attr('id','client$id').attr('class','client').style('opacity',1);\n";
+		print "clients[$id][3]= wifi[3].append('circle').attr('cx',$cx).attr('cy',$cy).attr('r',$r).style('fill','rgba(151,0,255,0.5)').attr('id','client$id').attr('class','client').style('opacity',1);\n\n";
+
 		
 		
-		
-		
-			foreach($p as $sid=>$sp)
+			$floor = null;
+			
+			foreach($p as $sid=>$sp) //Go through the animation
 			{
 				
 				$route = null;
 				$rev = 0;
 				$ap1 = $sp['AP1'];
 				$ap2 = $sp['AP2'];
+				$nFloor = null;
+
 				
 				foreach($routes as $r) //Find the route
 				{
 					if($r['AP1'] == $ap1 && $r['AP2'] == $ap2)
 					{
 						$route = $r['pathID'];
+						$nFloor = $r['floor'];
 						break;
 					}
 					else if($r['AP1'] == $ap2 && $r['AP2'] == $ap1) //Reversed mode
 					{
 						$route = $r['pathID'];
+						$nFloor = $r['floor'];
 						$rev = 1;
 						break;
 					}
@@ -196,47 +207,87 @@ function addPaths($start=0, $end=0)
 					
 				if($route != null)
 				{
+					//Check if on same floor
+					if($nFloor != $floor)
+					{
+						changeFloor($id, $nFloor,$delay,$dur);
+					}
+					
 
 					if(!isLongTime($dur))
 					{
-						print "client$id.transition().delay($delay).duration($dur).ease('linear').attrTween('transform',moveClient(svg.select('path#$route').node(),$rev, $dur));\n";
+						print "clients[$id][$nFloor].transition().delay($delay).duration($dur).ease('linear').attrTween('transform',moveClient('$route',$rev, $dur));\n";
+						if($nFloor != $floor && $floor != null)
+						{
+							print "clients[$id][$floor].transition().delay($delay).duration($dur).ease('linear').attrTween('transform',moveClient('$route',$rev, $dur));\n";
+						}
 					}
 					else
 					{
-						print "client$id.transition().delay($delay).style('opacity',0).duration(0);\n";
-						print "client$id.transition().delay($delay + $dur).style('opacity',1).duration(0);\n";
+						print "clients[$id][$nFloor].transition().delay($delay).style('opacity',0).duration(0);\n";
+						print "clients[$id][$nFloor].transition().delay($delay + $dur).style('opacity',1).duration(0);\n";
 					}
 				}
 				else
 				{
+					$nFloor = $aps[$ap2]['z'];
+					if($nFloor != $floor)
+					{
+						changeFloor($id, $nFloor,$delay,$dur);
+					}
+				
 					if(!isLongTime($dur))
 					{
 						//Fall back if no route found
 						$xpos = $aps[$ap2]['x'];
 						$ypos = $aps[$ap2]['y'];
-						print "client$id.transition().delay($delay + $dur).duration(0).attr('transform','translate($xpos,$ypos)');\n";
+						print "clients[$id][$nFloor].transition().delay($delay + $dur).duration(0).attr('transform','translate($xpos,$ypos)');\n";
 					}
 					else
 					{
-						print "client$id.transition().delay($delay).style('opacity',0).duration(0);\n";
-						print "client$id.transition().delay($delay + $dur).style('opacity',1).duration(0);\n";
+						print "clients[$id][$nFloor].transition().delay($delay).style('opacity',0).duration(0);\n";
+						print "clients[$id][$nFloor].transition().delay($delay + $dur).style('opacity',1).duration(0);\n";
 					}
 				}
 				
-				
+				$floor = $nFloor;
 				
 			}
 		$delay = scaleTime($iend - $start);
-		print "client$id.transition().delay($delay).style('opacity',0);\n";
+		print "clients[$id][0].transition().delay($delay).style('opacity',0);\n";
+		print "clients[$id][1].transition().delay($delay).style('opacity',0);\n";
+		print "clients[$id][2].transition().delay($delay).style('opacity',0);\n";
+		print "clients[$id][3].transition().delay($delay).style('opacity',0);\n";
 		
 		print "\n////End Routes for client #$id\n\n";
 	}
 }
 
+function changeFloor($id, $nFloor, $delay, $dur)
+{
+	print "//$id changing to floor $nFloor\n\n";
+	for($i = 0; $i < 4; $i++)
+	{
+		if($i == $nFloor)
+		{
+			print "clients[$id][$i].transition().delay($delay).duration($dur).style('opacity',1);\n";
+		}
+		else
+		{
+			print "clients[$id][$i].transition().delay($delay).duration($dur).style('opacity',0);\n";
+		}
+	
+	}
+	
+	print "\n\n//Done changing floors\n\n";
+
+
+}
+
 
 function addPoints($table)
 {
-	
+	/*
 	foreach($table as $row)
 	{
 	
@@ -246,6 +297,7 @@ function addPoints($table)
 		$r = 5;
 		print "wifi.append('circle').attr('cx',$cx).attr('cy',$cy).attr('r',$r).style('fill','rgba(255,0,255,0.2)');\n\n";
 	}
+	*/
 }
 
 
@@ -256,7 +308,7 @@ function addPoints($table)
 		$wStart = date('Y-m-d H:i:s',$start);
 		$wEnd = date('Y-m-d H:i:s',$end);
 	
-		$query = "select a.id apid, c.timestamp, c.clients, a.apname, a.x, a.y from clientsAtAP c left join APs a on (a.id = c.apID) where a.x is not null and c.timestamp between '$wStart' and '$wEnd' order by a.apname, c.timestamp";
+		$query = "select a.id apid, c.timestamp, c.clients, a.apname, a.x, a.y, a.floor from APs a left join clientsAtAP c   on (a.id = c.apID) where a.x is not null and c.timestamp between '$wStart' and '$wEnd' order by a.apname, c.timestamp";
 		
 		$sql = getSql();
 		
@@ -291,6 +343,8 @@ function addPoints($table)
 				$apID = $row['apid'];
 				$apdata[$apID]['x'] = $row['x'];
 				$apdata[$apID]['y'] = $row['y'];
+				$apdata[$apID]['z'] = $row['floor'];
+				//var_dump($row);
 				$apdata[$apID]['name'] = $row['apname'];				
 				
 			}
@@ -322,12 +376,13 @@ function addPoints($table)
 				$r = 20;
 				$x = $ap['x'];
 				$y = $ap['y'];
+				$z = $ap['z'];
 				$n = $ap['name'];
 				
 				print "//AP point $n\n\n";
 				
-				print "apBase[$apID] = wifi.append('circle').attr('cx',$x).attr('cy',$y).attr('r',$r).style('fill','rgba(118,238,194,0.1)').attr('name','$n').attr('class','AP');\n";
-				print "aps[$apID]    = wifi.append('circle').attr('cx',$x).attr('cy',$y).attr('r',0).style('fill','rgba(118,238,194,0.25)').attr('name','$n').attr('class','AP');\n\n";
+				print "apBase[$apID] = wifi[$z].append('circle').attr('cx',$x).attr('cy',$y).attr('r',$r).style('fill','rgba(118,238,194,0.1)').attr('name','$n').attr('class','AP');\n";
+				print "aps[$apID]    = wifi[$z].append('circle').attr('cx',$x).attr('cy',$y).attr('r',0).style('fill','rgba(118,238,194,0.25)').attr('name','$n').attr('class','AP');\n\n";
 				
 				if(isset($ap['data']))
 				{

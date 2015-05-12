@@ -22,7 +22,12 @@ $end = strtotime("March 28, 2015 5:00 pm");
 		//d3.select("body").append("svg").attr("width", 50).attr("height", 50).append("circle").attr("cx", 25).attr("cy", 25).attr("r", 25).style("fill", "purple");
 		$( document ).ready(function(){
 		var svg = d3.select("#svg2");
-		var wifi = d3.select("#floor2-ani");
+		var wifi = new Array();
+		
+		wifi[0] = d3.select("#floorG-ani");
+		wifi[1] = d3.select("#floor1-ani");
+		wifi[2] = d3.select("#floor2-ani");
+		wifi[3] = d3.select("#floor3-ani");
 		
 		
 		var lineFunction = d3.svg.line().x(function(d) { return d.x; }).y(function(d) { return d.y; }).interpolate('linear');
@@ -125,12 +130,16 @@ $end = strtotime("March 28, 2015 5:00 pm");
 		
 		function moveClient(path, rev, dur)
 		{
-			if(path === null)
+		
+			var nPath = svg.select('path#' + path).node();
+			
+			if(nPath === null)
 			{
-				console.log('No Path Found');
+				console.log('No Path Found: ' + path);
 				return;
 			}
-			var l = path.getTotalLength();
+			
+			var l = nPath.getTotalLength();
 			
 			
 			
@@ -152,7 +161,7 @@ $end = strtotime("March 28, 2015 5:00 pm");
 					}
 					
 					
-					var p = path.getPointAtLength(pos);
+					var p = nPath.getPointAtLength(pos);
 					return "translate(" + (p.x)  + "," + (p.y)  + ")";//Move marker
 				}
 			}
@@ -227,7 +236,7 @@ $end = strtotime("March 28, 2015 5:00 pm");
 		addPaths($start, $end);		
 		?>
 		//End PHP generated section
-		
+		/*
 		wifi.selectAll(".client").on('click',function(d,i){
 			if(d3.select(this).attr('r') <= 5)
 			{
@@ -238,6 +247,7 @@ $end = strtotime("March 28, 2015 5:00 pm");
 				d3.select(this).attr('r', 5 ).style('fill','rgba(151,0,255,0.3)');
 			}
 		});
+		*/
 		
 		
 		svg.selectAll('#floor2-areas').selectAll('g').style('opacity',0);
