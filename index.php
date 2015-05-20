@@ -1,14 +1,14 @@
 <?php
 error_reporting(E_ALL);
 ini_set("display_errors", 1);
-
+ini_set('memory_limit', '-1');
 
 require_once "wifiPath.php";
 require_once "config.php";
 
 setScale(1*60); //1 min / s
-$start = strtotime("March 28, 2015 1:00 pm");
-$end = strtotime("March 28, 2015 5:00 pm");
+$start = strtotime("March 30, 2015 10:00 am");
+$end = strtotime("April 7, 2015 5:00 pm");
 	
 
 
@@ -72,9 +72,16 @@ $end = strtotime("March 28, 2015 5:00 pm");
 				
 				isometric('#' + floors[i]);
 				
-				var y = 70*(4-i) - 170;
+				var y = getFloorDis(i);
+				//console.log(i + ' = ' + y);
 				 d3.select('#' + floors[i] + '-move').attr('transform', ' translate(-75,' + y + ')');
 			}
+		}
+		
+		
+		function getFloorDis(floor)
+		{
+			return 70*(4 - floor) - 170;
 		}
 		
 		function changeFloor(flr, dur)
@@ -83,7 +90,7 @@ $end = strtotime("March 28, 2015 5:00 pm");
 			for(var i = 0; i <= flr; i ++)
 			{
 				var f = d3.select(floors[i]);
-				var y = 70*((flr+1)-i) - 170;
+				var y = 70*((flr+1)-i) -170;
 				f.attr('display',null);
 				f.transition().duration(dur).attr('transform', ' translate(-75,' + y + ')').style('opacity',1);
 				
@@ -100,7 +107,7 @@ $end = strtotime("March 28, 2015 5:00 pm");
 			}
 		}
 		
-		function isometric(select, dur)
+		function isometric(select)
 		{
 			var obj = d3.select(select);
 			
@@ -121,14 +128,29 @@ $end = strtotime("March 28, 2015 5:00 pm");
 		}
 		
 		
+		var floor = 3;
+		$('#up').click(function()
+		{
+			floor++;
+			if(floor > 3) floor = 3;
+			console.log(floor);
+			changeFloor(floor,1000);
+		});
 		
+		$('#down').click(function()
+		{
+			floor--;
+			if(floor < 0) floor = 0;
+			console.log(floor);
+			changeFloor(floor,1000);
+		});
 
 		
 		
 		
 		
 		
-		function moveClient(path, rev, dur)
+		function moveClient(path, rev, dur, ffrom, fto)
 		{
 		
 			var nPath = svg.select('path#' + path).node();
@@ -146,23 +168,40 @@ $end = strtotime("March 28, 2015 5:00 pm");
 			return function(d, i, a) {
 			
 				d3.select(this).attr('speed',l/dur);
+				d3.select(this).attr('path',path);
+				d3.select(this).attr('rev',rev);
+				var obj = this;
+				var flr;
+				flr = fto - ffrom;  //-1, 0 or 1
+				d3.select(this).attr('aFloor',ffrom);
+				d3.select(this).attr('bFloor',fto);
 				//d = datum, i = index, a = current attribute
 				return function(t) {
 				//t = time (0 - 1)
 					var pos;
+					var time;
+
+					var chFlr;
 					
 					if(rev)
 					{
-						pos = (1-t) * l;
+						time = (1-t);
 					}
 					else
 					{
-						pos = t*l;
+						time = t;
+					}
+					pos = l*time;
+					
+					chFlr = 0 * flr;  // if flr = 1 then as t->1 chFlr->1
+					if(t >= 0.5)
+					{
+						chFlr = 1 * flr; 
 					}
 					
-					
+					//d3.select(obj).attr('pos', pos);
 					var p = nPath.getPointAtLength(pos);
-					return "translate(" + (p.x)  + "," + (p.y)  + ")";//Move marker
+					return "translate(" + (p.x)  + "," + (p.y + chFlr*70)  + ")";//Move marker
 				}
 			}
 		
@@ -267,31 +306,11 @@ $end = strtotime("March 28, 2015 5:00 pm");
 		})
 		;
 		
-		var floor = 3;
-		$('#up').click(function()
-		{
-			floor++;
-			if(floor > 3) floor = 3;
-			console.log(floor);
-			changeFloor(floor,1000);
-		});
-		
-		$('#down').click(function()
-		{
-			floor--;
-			if(floor < 0) floor = 0;
-			console.log(floor);
-			changeFloor(floor,1000);
-		});
 		
 		
 		
 		
-		wifi.selectAll(".AP").on('mouseover',function(d,i)
-		{
-				
-		
-		});
+
 		
 		
 		
