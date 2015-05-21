@@ -118,13 +118,13 @@ function clientJSON($start=0, $end=0)
 					$cmnh += $routes[$rn]['CMNH'];
 				}
 					
-					
+				
 				if($route != null)
 				{
 					$rts++;
 					$nPaths++;
 
-					
+						if($floor == null) $floor = $nFloor;
 						//Create the next step in the animation
 						$step = array();
 						$step["floor1"] = $floor;

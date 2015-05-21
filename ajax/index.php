@@ -6,9 +6,11 @@ ini_set('memory_limit', '-1');
 //require_once "wifiPath.php";
 require_once "config.php";
 
-setScale(1*20*60); //1 min / s
+//setScale(1*60*60); //1 hr / s
 $start = strtotime("March 30, 2015 10:00 am");
 $end = strtotime("April 7, 2015 5:00 pm");
+
+setScale(($end - $start)/(15*60)); //Whole animation in 15 min
 
 
 
@@ -30,15 +32,24 @@ $end = strtotime("April 7, 2015 5:00 pm");
 				wifi[3] = d3.select("#floor3-ani");
 				
 				//Time vars
+				//JS Time
 				var startTime = getScaledTime(<?php print $start * 1000;?>);
 				var currentTime = getScaledTime(<?php print $start * 1000;?>);
 				var endTime = getScaledTime(<?php print $end * 1000;?>);
+				//Unix Time
 				var start = <?php print $start;?>;
 				var end = <?php print $end ?>;
+				//Intervals
 				var intv = 10;
-
 				var ajaxIntv = 1*60*60 //Set up a new load for every 1 hour of data
-				 startAnimation(start, end);
+				
+				
+				/* main */
+				displayFloors();
+				
+				startAnimation(start, end);
+				
+				
 				//Setup AJAX
 				function startAnimation(start, end)
 				{
@@ -48,18 +59,16 @@ $end = strtotime("April 7, 2015 5:00 pm");
 						{
 							action: "clients",
 							start: t,
-							end: t + ajaxIntv * 1.5
+							end: t + ajaxIntv * 1.5 //For a little overlap in the animation to make it transition smoother
 						}).done(function(data) {
 							
-							//console.log(data.start + "?=" + start);
 							if(data.start == start) //We can start the animation
 							{
-								//console.log("TRUE!");
 								startTick();
 
 								dispSeq(data);
 							}
-							else
+							else  //Wait until it's time to run the animation
 							{
 								waitForSeq(data, getScaledTime(data.start*1000));
 							}
@@ -75,7 +84,7 @@ $end = strtotime("April 7, 2015 5:00 pm");
 					function tick()
 					{
 						currentTime += intv;
-						$('#time').text(timeConverter(getRealTime(currentTime)));
+						svg.select('#Time').text(timeConverter(getRealTime(currentTime)));
 						if(currentTime >= endTime)
 						{
 							clearInterval(timeTick);
@@ -116,33 +125,51 @@ $end = strtotime("April 7, 2015 5:00 pm");
 					for(var c = 0; c < nClients; c ++)
 					{
 						var floor = data.clients[c].data[0].floor2;
-						color = getColor(data.clients[c].cma, data.clients[c].cmnh);
-						if(d3.select("#client" + data.clients[c].id).empty())
+
+						if(d3.select("#client" + data.clients[c].id).empty()) //If the client does not exist create it
 						{
-							wifi[floor].append('circle').attr("id", "client" + data.clients[c].id ).attr('cx',0).attr('cy',0).attr('r',3).attr('class','client').style('fill',color);
+							color = getColor(data.clients[c].cma, data.clients[c].cmnh);
+							wifi[floor].append('circle').attr("id", "client" + data.clients[c].id ).attr('cx',0).attr('cy',0).attr('r',3).attr('floor',floor).attr('class','client').attr('cma',data.clients[c].cma).attr('cmnh', data.clients[c].cmnh).style('fill',color);
 						}
-						else
+						else //otherwise update the museums and recolor it.
 						{
-							d3.select("#client" + data.clients[c].id).style('fill',color);
+							var cma = parseFloat(d3.select("#client" + data.clients[c].id).attr('cma')) + data.clients[c].cma;
+							var cmnh = parseFloat(d3.select("#client" + data.clients[c].id).attr('cmnh')) + data.clients[c].cmnh;
+							color = getColor(cma, cmnh);
+							d3.select("#client" + data.clients[c].id).style('fill',color).attr('cma',cma).attr('cmnh', cmnh);
 						}
+						
 						
 						var dlength = data.clients[c].data.length;
 						
 						for(var d = 0; d < dlength; d++)
 						{
 							
-							//Change floors
-							if(data.clients[c].data[d].floor2 != floor)
-							{
-								d3.select("#client" + data.clients[c].id).remove();
-								floor = data.clients[c].data[d].floor2;
-								wifi[floor].append('circle').attr("id", "client" + data.clients[c].id ).attr('cx',0).attr('cy',0).attr('r',3).attr('class','client').style('fill',color);
-							}
-							
-							d3.select("#client" + data.clients[c].id).transition().delay(getScaledTime(data.clients[c].data[d].delay * 1000)).duration(getScaledTime(data.clients[c].data[d].duration * 1000)).ease('linear').attrTween('transform',moveClient(data.clients[c].data[d].route, data.clients[c].data[d].rev)).attr('path',data.clients[c].data[d].route).attr('reverse',data.clients[c].data[d].rev).attr('age',parseFloat(data.start) + parseFloat(data.clients[c].data[d].delay) );							
+
+
+							d3.select("#client" + data.clients[c].id).transition().delay(getScaledTime(data.clients[c].data[d].delay * 1000)).duration(getScaledTime(data.clients[c].data[d].duration * 1000)).ease('linear').attrTween('transform',moveClient(data.clients[c].data[d].route, data.clients[c].data[d].rev, data.clients[c].data[d].floor1, data.clients[c].data[d].floor2)).attr('path',data.clients[c].data[d].route).attr('reverse',data.clients[c].data[d].rev).attr('age',parseFloat(data.start) + parseFloat(data.clients[c].data[d].delay) );							
 						}
 					}
 				}
+				
+				/* Move the client across floors */
+				function moveClientFloor(clientID, newFloor)
+				{
+						var client = '#' + clientID;
+						d3.select(client).attr('floor',newFloor);
+						var tempClient = d3.select(client).remove();
+						try
+						{
+							wifi[newFloor].append(function() { return tempClient.node(); });
+						}
+						catch(e)
+						{
+							console.log(e);
+						}
+
+				
+				}
+				
 				/* get the dot color */
 				function getColor(cma,cmnh)
 				{
@@ -160,13 +187,57 @@ $end = strtotime("April 7, 2015 5:00 pm");
 					}
 					else
 					{
-						return "rgba(255,255,255,0.5)";
+						return "rgba(255,151,0,0.5)";
 					}
 				
 				}
+				//colorSky();
+				function colorSky()
+				{
+
+					var csHrs = 1;
+					var csIntv = getScaledTime(csHrs * 60 * 60 * 1000);
+					console.log(csIntv);
+					var sky = setInterval(function()
+					{
+							var d = new Date(getRealTime(currentTime));
+							var h = d.getHours();
+							var color;
+							
+							if(h + csHrs <= 6)//Dawn
+							{
+								color = "rgb(16,59,97)";
+							}
+							else if(h + csHrs <= 8)//Sunrise
+							{
+								color = "rgb(244,210,129)";
+							}
+							else if(h + csHrs <= 12)//Morning
+							{
+								color = "rgb(247,249,119)";
+							}
+							else if(h + csHrs <= 18)//Afternoon
+							{
+								color = "rgb(249,251,48)";
+							}
+							else if(h + csHrs <= 20)//Sunset
+							{
+								color = "rgb(244,210,129)";
+							}
+							else //Night
+							{
+								color = "rgb(16,59,97)";
+							}
+							//console.log(color);
+							d3.select("#svgHolder").transition().duration(csIntv).style('background-color',color);
+							
+					},csIntv);
+					
+				}
+				
 				
 				//Move the client
-				function moveClient(path, rev)
+				function moveClient(path, rev, ffrom, fto)
 				{
 				
 					var nPath = svg.select('path#' + path).node();
@@ -178,18 +249,40 @@ $end = strtotime("April 7, 2015 5:00 pm");
 					}
 					
 					var l = nPath.getTotalLength();
-					
+
 					
 					
 					return function(d, i, a) {
 					
 						d3.select(this).attr('path',path);
 						d3.select(this).attr('rev',rev);
+						var id = d3.select(this).attr("id");
+
+						var cFlr = d3.select(this).attr('floor'); //current floor
+						
+						var dFloor;  //change in floors
+						if(rev)
+						{
+							dFloor = fto - ffrom;
+						}
+						else
+						{
+							dFloor = ffrom - fto;
+						}
+						
+						if(cFlr != ffrom) //If the client isn't on the starting floor
+						{
+							moveClientFloor(id, ffrom);
+						}
+						d3.select(this).attr('aFloor',ffrom);
+						d3.select(this).attr('bFloor',fto);
+						var change = true;
 						//d = datum, i = index, a = current attribute
 						return function(t) {
 						//t = time (0 - 1)
 							var pos;
-							var time;						
+							var time;
+							
 							if(rev)
 							{
 								time = (1-t);
@@ -200,16 +293,29 @@ $end = strtotime("April 7, 2015 5:00 pm");
 							}
 							pos = l*time;
 							
-							//d3.select(obj).attr('pos', pos);
 							var p = nPath.getPointAtLength(pos);
-							var x= p.x;
+							var x = p.x;
 							var y = p.y;
-							//Add some fuzzing to show multiple people at wifi
-							if(t == 1)
+							
+							if(time >= 0.5)
+							{
+								y += 70*(dFloor);
+							}							
+							if(t >= 0.5)
+							{
+								if(ffrom != fto && change)
+								{
+									change = false;
+									moveClientFloor(id, fto); //Change floors 1/2 way
+								}
+							}
+							if(time == 1 || time == 0)  //Improve visuals of multiple people
 							{
 								x = fuzz(x);
 								y = fuzz(y);
 							}
+							
+							
 							
 							return "translate(" + x  + "," + y  + ")";//Move marker
 						}
@@ -219,8 +325,8 @@ $end = strtotime("April 7, 2015 5:00 pm");
 				
 				function fuzz(val)
 				{
-					var fVal = 5
-					return val - fVal + 2 * fVal * Math.random(); // +/- 10 px
+					var fVal = 7
+					return val - fVal + 2 * fVal * Math.random(); // +/- 7 px
 					
 				}
 
@@ -242,9 +348,80 @@ $end = strtotime("April 7, 2015 5:00 pm");
 				})
 				;
 				
+				/* D3 client icons */
+				dispClientCounts();
+				function dispClientCounts()
+				{
+					var ccIntv = getScaledTime( 60 * 60 * 1000);
+					//Both
+					var color = getColor(1,1);
+					var both = 	d3.select("#cBoth")
+					both.style('fill',color).append("svg:title").text("Visitors of both museums");
+					var bothText = d3.select("#colorIndicators").append("text");
+					bothText.attr("x",both.attr("cx")).attr("y",both.attr("cy")).attr("title",both.attr("title")).attr("text-anchor","middle").attr("dominant-baseline", "central").attr('fill','black').attr("font-family", "sans-serif").attr("font-size", "14px").text('0').attr('class','counterText').attr("stroke-width",0);
+					bothText.append("svg:title").text("Visitors of both museums");
+					
+					//CMA
+					color = getColor(1,0);
+					var cma = d3.select("#cCMA")
+					cma.style('fill',color).append("svg:title").text("Visitors of CMOA only");
+					var cmaText = d3.select("#colorIndicators").append("text");
+					cmaText.attr("x",cma.attr("cx")).attr("y",cma.attr("cy") ).attr("title",cma.attr("title")).attr("text-anchor","middle").attr("dominant-baseline", "central").attr('fill','black').attr("font-family", "sans-serif").attr("font-size", "14px").text('0').attr('class','counterText').attr("stroke-width",0);
+					cmaText.append("svg:title").text("Visitors of CMOA only");
+					
+					//CMNH
+					color = getColor(0,1);
+					var cmnh = d3.select("#cCMNH")
+					cmnh.style('fill',color).append("svg:title").text("Visitors of CMNH only");
+					var cmnhText = d3.select("#colorIndicators").append("text");
+					cmnhText.attr("x",cmnh.attr("cx")).attr("y",cmnh.attr("cy") ).attr("title",cmnh.attr("title")).attr("text-anchor","middle").attr("dominant-baseline", "central").attr('fill','white').attr("font-family", "sans-serif").attr("font-size", "14px").text('0').attr('class','counterText').attr("stroke-width",0);
+					cmnhText.append("svg:title").text("Visitors of CMNH only");
+					
+					//Neither
+					color = getColor(0,0);
+					var neither = d3.select("#cNeither")
+					neither.style('fill',color).append("svg:title").text("Visitors of neither museum");
+					var neitherText = d3.select("#colorIndicators").append("text");
+					neitherText.attr("x",neither.attr("cx")).attr("y",neither.attr("cy") ).attr("text-anchor","middle").attr("dominant-baseline", "central").attr('fill','black').attr("font-family", "sans-serif").attr("font-size", "14px").text('0').attr('class','counterText').attr("stroke-width",0);
+					neitherText.append("svg:title").text("Visitors of neither museum");
+					
+					var cliCount = setInterval(function ()
+					{
+						var cBoth = d3.selectAll(".client").filter(function(d,i){
+						if(d3.select(this).attr("cma") >= 1 && d3.select(this).attr("cmnh") >= 1) return true; 
+						return false;
+						});
+						bothText.text(cBoth[0].length);
+						
+						var cCMA = d3.selectAll(".client").filter(function(d,i){
+						if(d3.select(this).attr("cma") >= 1 && d3.select(this).attr("cmnh") == 0) return true; 
+						return false;
+						});
+						cmaText.text(cCMA[0].length);
+						
+						var cCMNH = d3.selectAll(".client").filter(function(d,i){
+						if(d3.select(this).attr("cma") == 0 && d3.select(this).attr("cmnh") >= 1) return true; 
+						return false;
+						});
+						cmnhText.text(cCMNH[0].length);
+						
+						var cNei = d3.selectAll(".client").filter(function(d,i){
+						if(d3.select(this).attr("cma") == 0 && d3.select(this).attr("cmnh") == 0) return true; 
+						return false;
+						});
+						neitherText.text(cNei[0].length);
+					
+					
+					},ccIntv);
+					
+					
+					
+					
+				}
+				
 				
 				/* Displaying the floors */
-						displayFloors();
+						
 				
 				function displayFloors()
 				{
@@ -332,6 +509,8 @@ $end = strtotime("April 7, 2015 5:00 pm");
 					changeFloor(floor,1000);
 				});
 				
+
+				
 			
 			}); //End jQ main
 			
@@ -407,9 +586,7 @@ $end = strtotime("April 7, 2015 5:00 pm");
 			}
 			#time
 			{
-				color:C7C4C1;
-				font-family:sans serif;
-				font-size:10px;
+
 				
 			}
 			#controls
@@ -427,6 +604,9 @@ $end = strtotime("April 7, 2015 5:00 pm");
 		<button id='down'>Down</button>
 	</div>
 	<p id='time'></p>
+	<div id='counts'>
+	
+	</div>
 
 	</body>
 </html>

@@ -107,6 +107,7 @@ $end = strtotime("April 7, 2015 5:00 pm");
 						color = getColor(data.clients[c].cma, data.clients[c].cmnh);
 						d3Clients[c].style('fill',color);
 						var dlength = data.clients[c].data.length;
+						
 						for(var d = 0; d < dlength; d++)
 						{
 							//Change floors
