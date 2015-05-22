@@ -6,11 +6,11 @@ ini_set('memory_limit', '-1');
 //require_once "wifiPath.php";
 require_once "config.php";
 
-//setScale(1*60*60); //1 hr / s
-$start = strtotime("March 30, 2015 10:00 am");
-$end = strtotime("April 7, 2015 5:00 pm");
+setScale(10*60); //10 s / s
+$start = strtotime("May 21, 2015 10:00 am");
+$end = strtotime("May 21, 2015 8:30 pm");
 
-setScale(($end - $start)/(15*60)); //Whole animation in 15 min
+//setScale(($end - $start)/(15*60)); //Whole animation in 15 min
 
 
 
@@ -129,7 +129,7 @@ setScale(($end - $start)/(15*60)); //Whole animation in 15 min
 						if(d3.select("#client" + data.clients[c].id).empty()) //If the client does not exist create it
 						{
 							color = getColor(data.clients[c].cma, data.clients[c].cmnh);
-							wifi[floor].append('circle').attr("id", "client" + data.clients[c].id ).attr('cx',0).attr('cy',0).attr('r',3).attr('floor',floor).attr('class','client').attr('cma',data.clients[c].cma).attr('cmnh', data.clients[c].cmnh).style('fill',color);
+							wifi[floor].append('circle').attr("id", "client" + data.clients[c].id ).attr('cx',0).attr('cy',0).attr('r',5).attr('floor',floor).attr('class','client').attr('cma',data.clients[c].cma).attr('cmnh', data.clients[c].cmnh).style('fill',color);
 						}
 						else //otherwise update the museums and recolor it.
 						{
@@ -144,10 +144,10 @@ setScale(($end - $start)/(15*60)); //Whole animation in 15 min
 						
 						for(var d = 0; d < dlength; d++)
 						{
-							
 
 
-							d3.select("#client" + data.clients[c].id).transition().delay(getScaledTime(data.clients[c].data[d].delay * 1000)).duration(getScaledTime(data.clients[c].data[d].duration * 1000)).ease('linear').attrTween('transform',moveClient(data.clients[c].data[d].route, data.clients[c].data[d].rev, data.clients[c].data[d].floor1, data.clients[c].data[d].floor2)).attr('path',data.clients[c].data[d].route).attr('reverse',data.clients[c].data[d].rev).attr('age',parseFloat(data.start) + parseFloat(data.clients[c].data[d].delay) );							
+
+							d3.select("#client" + data.clients[c].id).transition().delay(getScaledTime(data.clients[c].data[d].delay * 1000)).duration(getScaledTime(data.clients[c].data[d].duration * 1000)).ease('linear').attrTween('transform',moveClient(data.clients[c].data[d].route, data.clients[c].data[d].rev, data.clients[c].data[d].floor1, data.clients[c].data[d].floor2)).attr('path',data.clients[c].data[d].route).attr('age',parseFloat(data.start) + parseFloat(data.clients[c].data[d].delay) );							
 						}
 					}
 				}
@@ -255,7 +255,8 @@ setScale(($end - $start)/(15*60)); //Whole animation in 15 min
 					return function(d, i, a) {
 					
 						d3.select(this).attr('path',path);
-						d3.select(this).attr('rev',rev);
+						d3.select(this).attr('reverse',rev);
+						
 						var id = d3.select(this).attr("id");
 
 						var cFlr = d3.select(this).attr('floor'); //current floor
@@ -270,10 +271,10 @@ setScale(($end - $start)/(15*60)); //Whole animation in 15 min
 							dFloor = ffrom - fto;
 						}
 						
-						if(cFlr != ffrom) //If the client isn't on the starting floor
-						{
+						//if(cFlr != ffrom) //If the client isn't on the starting floor
+						//{
 							moveClientFloor(id, ffrom);
-						}
+						//}
 						d3.select(this).attr('aFloor',ffrom);
 						d3.select(this).attr('bFloor',fto);
 						var change = true;
@@ -297,13 +298,14 @@ setScale(($end - $start)/(15*60)); //Whole animation in 15 min
 							var x = p.x;
 							var y = p.y;
 							
+							d3.select('#' + id).attr('time',t);
 							if(time >= 0.5)
 							{
-								y += 70*(dFloor);
+								//y += -70*(dFloor);
 							}							
 							if(t >= 0.5)
 							{
-								if(ffrom != fto && change)
+								if(ffrom != fto && change) //ffrom != fto && 
 								{
 									change = false;
 									moveClientFloor(id, fto); //Change floors 1/2 way

@@ -134,6 +134,7 @@ function clientJSON($start=0, $end=0)
 					
 						//Create the next step in the animation
 						$step = array();
+						$step["rev"] = $rev;
 						$step["floor1"] = $floor;
 						$step["floor2"] = $nFloor;
 						$step["delay"] = $delay;
