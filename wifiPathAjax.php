@@ -317,7 +317,7 @@ function getRoutes()
 
 /**** TODO: Setup APs ****/
 
-/*
+
 
 	
 	function getAPs($start = 0, $end = 0)
@@ -374,7 +374,7 @@ function getRoutes()
 		return $apdata;
 	
 	}
-	
+/*
 	function addAPs($start = 0, $end = 0)
 	{
 	
