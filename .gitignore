@@ -1,2 +1,4 @@
 sqlConfig.php
-app/
+resources/
+*.csv
+matrixView.html
