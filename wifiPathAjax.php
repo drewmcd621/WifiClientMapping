@@ -14,7 +14,7 @@ if (is_ajax() || true) {
     $action = $_GET["action"];
 		switch($action) { //Switch case for value of action
 			case "clients" : clientJSON(); break;
-			case  "aps" : apJSON(); break;
+			//case  "aps" : apJSON(); break;
 		}
 	}
 }
@@ -42,6 +42,13 @@ function clientJSON($start=0, $end=0)
 	$send =  scaleTime($start);
 	
 	$missing = array();
+	
+	
+	
+	$pur = 0;
+	$red = 0;
+	$yel = 0;
+	$orn = 0;
 	
 	$nPaths = 0;
 	
@@ -107,8 +114,8 @@ function clientJSON($start=0, $end=0)
 					
 					
 				//Get times
-				$delay = $sp['start'] - $start;
-				$dur = $sp['end'] - $sp['start'];
+				$delay = scaleTime($sp['start'] - $start);
+				$dur = scaleTime($sp['end'] - $sp['start']);
 					
 				
 				//Check if the client has gone to cma or cmnh
@@ -118,21 +125,21 @@ function clientJSON($start=0, $end=0)
 					$cmnh += $routes[$rn]['CMNH'];
 				}
 					
-				
+					
 				if($route != null)
 				{
 					$rts++;
 					$nPaths++;
 
-						if($floor == null) $floor = $nFloor;
+					
 						//Create the next step in the animation
 						$step = array();
+						$step["rev"] = $rev;
 						$step["floor1"] = $floor;
 						$step["floor2"] = $nFloor;
 						$step["delay"] = $delay;
 						$step["duration"] = $dur;
 						$step["route"] = $route;
-						$step['rev'] = $rev;
 						array_push($client["data"], $step);
 						
 				}
@@ -183,8 +190,8 @@ function clientJSON($start=0, $end=0)
 			
 		
 	}
-	
-	
+	echo json_encode($clients);
+	/*
 
 	//Log the missing routes
 	arsort($missing);
@@ -200,7 +207,8 @@ function clientJSON($start=0, $end=0)
 	$log .= "Total,$count,$p\n";
 	file_put_contents('MissingRoutes.csv',$log);
 	
-	echo json_encode($clients);
+	*/
+	
 }
 	
 
@@ -307,9 +315,9 @@ function getRoutes()
 //var_dump($paths);
 
 
+/**** TODO: Setup APs ****/
 
-
-
+/*
 
 	
 	function getAPs($start = 0, $end = 0)
@@ -411,4 +419,5 @@ function getRoutes()
 				
 		}
 	}
+*/
 ?>
