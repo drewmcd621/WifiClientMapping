@@ -75,6 +75,7 @@
    <path id="PorttoCME" d="m476.81 361.89s-17.521-9.5481-50.912-13.789c-33.391-4.2406-149.2 1.7678-149.2 1.7678" stroke="#000" stroke-width="1px" fill="none"/>
    <path id="CMEtoCoat" d="m330.93 347.21s84.834 5.0067 106.77-0.35356c21.94-5.3603 30.649-22.64 37.477-40.659 6.8276-18.019 2.3437-44.461-1.7678-60.812-4.1115-16.35-17.395-25.354-18.031-36.063-0.636-10.708 7.8903-12.398 8.1318-22.628 0.24147-10.23-13.679-25.889-10.96-35.709 2.7187-9.82 17.678-15.91 17.678-15.91" stroke="#000" stroke-width="1px" fill="none"/>
    <path id="BirdtoLib" d="m452.91 347.56s17.8-21.666 24.042-33.941c6.2414-12.275 1.7255-30.242 13.082-38.891 11.356-8.6493 29.642 4.553 40.305-2.1214 10.664-6.6744 28.992-37.477 28.992-37.477s1.2283 11.209 4.2426 13.435c3.0144 2.2264 8.1318 3.5356 8.1318 3.5356" stroke="#000" stroke-width="1px" fill="none"/>
+   <path id="CoattoBird" d="m459.48 134.91s-38.311 20.241-36.77 37.831c1.5406 17.589 27.301 33.699 43.134 31.113 15.833-2.5856-1.0924-43.801 25.103-35.002 26.195 8.7985-3.182 122.68-3.182 122.68" display="inline" stroke="#000" stroke-width="1px" fill="none"/>
   </g>
   <g id="floorG-ani">
    <rect id="rect4495" stroke-linejoin="round" stroke-dashoffset="0.6" height="7.0711" width="6.364" stroke="#fff" stroke-linecap="square" y="609.38" x="592.77" stroke-width="2" fill="#fff"/>
@@ -203,7 +204,6 @@
    <path id="TicktoCont" d="m76.226 37.329s-2.7154 39.484-2.4749 45.255c0.24054 5.7714 0.71528 24.982 0.70712 34.649-0.0082 9.6661-0.12442 15.559-0.35355 23.335" stroke="#000" stroke-width="1px" fill="none"/>
    <path id="ConttoCD" d="m74.507 138.89s-1.9099-22.684-0.75001-31c1.1599-8.3166-0.41627-14.186 5.7501-18.5 6.1663-4.3141 18.913-1.0269 32.25-0.5s2.4542 18.933 19.75 19.5c17.296 0.56723 75.001-1.25 75.001-1.25" display="inline" stroke="#000" stroke-width="1px" fill="none"/>
    <path id="HFtoLib" d="m531.96 99.555s22.248-1.0769 33.234 0.35355c0 0 5.1786 8.0892 4.9498 18.739-0.93149 43.36 0 130.11 0 130.11" display="inline" stroke="#000" stroke-width="1px" fill="none"/>
-   <path id="AOTAtoCoat" d="m568.2 236.75s7.6617-114.36-3.5356-132.23c-7.2114-11.511-111.72-1.4142-111.72-1.4142" stroke="#000" stroke-width="1px" fill="none"/>
    <path id="GStoAOTA" d="m382.23 105.23s134.07-0.62445 167.23-3.5356c7.3925-0.64897 16.943 4.8204 18.739 12.021 7.4037 29.699 0.35357 123.39 0.35357 123.39" stroke="#000" stroke-width="1px" fill="none"/>
    <path id="PortaltoET" d="m334.32 382.77s-20.282-2.2449-28.285 2.8285c-9.8666 6.2551-16.78 18.437-18.031 30.052-2.0125 18.675 18.031 53.387 18.031 53.387" stroke="#000" stroke-width="1px" fill="none"/>
    <path id="ETtoFF" d="m306.76 468.89s-22.612 16.523-26.75 24.5c-4.1384 7.9769 1.3588 14.055-2.25 17.5-3.6088 3.4451-7.3324 0.97811-12.25 1-4.9178 0.0219-17.825-0.052-29.5-0.5-11.676-0.44798-27.031-1.4361-40.5-2.75" display="inline" stroke="#000" stroke-width="1px" fill="none"/>
@@ -215,8 +215,9 @@
    <path id="BalctoLHall" d="m311.51 172.76s0.72071 14.743-13.966 18.562c-14.686 3.8192-14.259 2.3256-17.324-0.35356-3.0652-2.6792 0.0127-7.0054-2.8284-9.7228-2.8411-2.7175-9.6666-3.6887-13.082-3.182-3.415 0.50671 0.67263 24.337-1.0607 33.588s2.1397 14.858-7.6015 21.567c-9.7412 6.7088-48.084-1.2374-48.084-1.2374" stroke="#000" stroke-width="1px" fill="none"/>
    <path id="GrLtoBS" d="m75.159 37.578-0.707 107.13" stroke="#000" stroke-width="1px" fill="none"/>
    <path id="CoattoD17" d="m421 116.37s-55.043 2.7629-58.501 0c-3.4579-2.7629 2.7797-45.66-0.75-48.5s-20.051-2.3402-22-0.50001c-1.9496 1.8401-5.1626 34.06 0.25 36.5 5.4126 2.4404-0.13792 2.6222 13.75 2.5 13.888-0.12218 69.751 1.25 69.751 1.25" stroke="#000" stroke-width="1px" fill="none"/>
-   <path id="CoattoBird" d="m459.48 134.91s-38.311 20.241-36.77 37.831c1.5406 17.589 27.301 33.699 43.134 31.113 15.833-2.5856-1.0924-43.801 25.103-35.002 26.195 8.7985-3.182 122.68-3.182 122.68" stroke="#000" stroke-width="1px" fill="none"/>
    <path id="ETtoPort" d="m305.33 467.61s-18.099 17.407-21.921 25.81c-3.8216 8.4027 1.4543 13.786-3.5356 18.385-4.9899 4.5992-17.085 1.666-24.395 1.4142-7.3106-0.25179-17.106 0.9332-21.921-4.9498-4.8142-5.883 0.70711-50.912 0.70711-50.912" stroke="#000" stroke-width="1px" fill="none"/>
+   <path id="LibtoCoat" d="m571.63 246.56s3.6793-138.97-2.4912-147.69c-6.17-8.727-129.9 4.62-129.9 4.62" stroke="#000" stroke-width=".71176px" fill="none"/>
+   <path id="AOTAtoCoat" d="m434.19 101.23 100.01-3.563" stroke="#000" stroke-width=".71176px" fill="none"/>
   </g>
   <g id="floor1-ani">
    <rect id="rect4897" height="1.9446" width="1.9446" y="36.091" x="413.87" fill="#fafefa"/>
@@ -460,11 +461,11 @@
     <rect id="rect4394-2" opacity=".5" height="128.87" width="53.387" y="112.54" x="344.19" fill="#ffb99d"/>
     <text id="text4404-8" style="word-spacing:0px;letter-spacing:0px;text-anchor:middle;text-align:center" transform="rotate(90)" line-height="125%" xml:space="preserve" font-size="15px" y="-359.74255" x="176.15094" font-family="Sans" fill="#000000"><tspan id="tspan4408-0" font-size="12.5px" y="-359.74255" x="176.15094">Heinz Architecture</tspan></text>
    </g>
-    <g id="Stairs" transform="translate(59.574 -1.4142)">
+   <g id="Stairs" transform="translate(59.574 -1.4142)">
     <path id="rect4461" opacity=".5" d="m476.77 241.94v-126.93h15.203c0.26319 24.433-0.49809 119.25-0.49809 119.25h15.203v60.105h-41.013v-52.427z" fill="#bcff9d"/>
     <text id="text4479" style="word-spacing:0px;letter-spacing:0px" xml:space="preserve" font-size="10px" y="256.93137" x="473.72217" font-family="Sans" line-height="125%" fill="#000000"><tspan id="tspan4481" x="473.72217" y="256.93137">Stairs</tspan></text>
    </g>
-     <g id="Scaife">
+   <g id="Scaife">
     <path id="path4488" opacity=".5" d="m377.1 49.603v64.347h174.09v103.77h15.38v74.07h175.19v-241.66h-191.45l-31.467 11.314-0.17678-11.491-30.759 11.491-0.17677-10.96-30.406 10.96-0.35356-11.314-30.052 10.783-0.17678-10.96z" fill-rule="evenodd" fill="#ffb99d"/>
     <text id="text4514" style="word-spacing:0px;letter-spacing:0px" line-height="125%" font-size="15px" y="164.14708" x="609.00787" font-family="Sans" xml:space="preserve" fill="#000000"><tspan id="tspan4520" y="164.14708" x="609.00787">Scaife</tspan></text>
     <text id="text4514-5" style="word-spacing:0px;letter-spacing:0px" line-height="125%" font-size="15px" y="228.82042" x="606.51825" font-family="Sans" xml:space="preserve" fill="#000000"><tspan id="tspan4520-6" y="228.82042" x="606.51825">Galleries</tspan></text>
@@ -594,7 +595,7 @@
   </g>
  </g>
  <g id="Display">
-  <text id="Time" style="word-spacing:0px;letter-spacing:0px" xml:space="preserve" font-size="13.75px" line-height="125%" y="65.456085" x="637.72815" font-family="sans-serif" fill="#8a8a8a"><tspan id="tspan4652" x="637.72815" y="65.456085"><tspan id="tspan4654" font-size="13.75px" line-height="125%" y="65.456085" x="637.72815" font-family="sans-serif" fill="#8a8a8a">Loading...</tspan></tspan></text>
+  <text id="Time" style="word-spacing:0px;letter-spacing:0px" xml:space="preserve" font-size="13.75px" line-height="125%" y="84.481705" x="637.05829" font-family="sans-serif" fill="#8a8a8a"><tspan id="tspan4652" x="637.05829" y="84.481705"><tspan id="tspan4654" font-size="13.75px" line-height="125%" y="84.481705" x="637.05829" font-family="sans-serif" fill="#8a8a8a">Loading...</tspan></tspan></text>
   <g id="colorIndicators" stroke-linejoin="round" fill-rule="evenodd" transform="translate(62.328 -626.61)" stroke-dashoffset="0.6" stroke="#475569" stroke-linecap="square" stroke-width="2" fill="#d0d0d0">
    <circle id="cBoth" cy="651.01" cx="593.39" r="17.972"/>
    <circle id="cCMA" cy="651.01" cx="664.52" r="17.972"/>
@@ -630,5 +631,9 @@
     </g>
    </g>
   </g>
+  <text id="tBoth" style="word-spacing:0px;letter-spacing:0px" xml:space="preserve" transform="translate(-.0000023077)" line-height="125%" font-size="14.235px" y="59.276909" x="639.11816" font-family="sans-serif" fill="#475569"><tspan id="tspan4859" x="639.11816" y="59.276909">Both</tspan></text>
+  <text id="tCMOA" style="word-spacing:0px;letter-spacing:0px" xml:space="preserve" transform="translate(-.0000023077)" line-height="125%" font-size="14.235px" y="59.151787" x="705.08984" font-family="sans-serif" fill="#475569"><tspan id="tspan4859-9" x="705.08984" y="59.151787">CMOA</tspan></text>
+  <text id="tCMNH" style="word-spacing:0px;letter-spacing:0px" xml:space="preserve" transform="translate(-.0000023077)" line-height="125%" font-size="14.235px" y="59.151787" x="776.62555" font-family="sans-serif" fill="#475569"><tspan id="tspan4859-9-6" x="776.62555" y="59.151787">CMNH</tspan></text>
+  <text id="tNeither" style="word-spacing:0px;letter-spacing:0px" xml:space="preserve" transform="translate(-.0000023077)" line-height="125%" font-size="14.235px" y="59.294273" x="842.31226" font-family="sans-serif" fill="#475569"><tspan id="tspan4859-9-6-5" x="842.31226" y="59.294273">Neither</tspan></text>
  </g>
 </svg>

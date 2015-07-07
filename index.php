@@ -1,80 +1,106 @@
-<?php 
+<?php
 error_reporting(E_ALL);
 ini_set("display_errors", 1);
 ini_set('memory_limit', '-1');
 
 require_once "control.php";
 
+$select = true;
+if(isset($_GET["m"]))
+{
+	if($_GET["m"] == "demo")
+	{
+		$select = false;
+		$start = strtotime("3/30/2015 1:00 pm") * 1000;
+		$end = strtotime("3/30/2015 5:00 pm") * 1000;
+	}
+}
 
 
 ?>
 <html>
 	<head>
 		<meta name="viewport" content="width=device-width, initial-scale=1">
-	
+
 		<script src="https://code.jquery.com/jquery-1.10.2.js"></script>
 		<script type="text/javascript" src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
-		
+
 		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
 		<link rel="stylesheet" href="resources/css/bootstrap-datepicker.min.css">
-		
+
 
 		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
 		<script type="text/javascript" src="resources/js/bootstrap-datepicker.min.js"></script>
-		
+
 		<script type="text/javascript">
 			$("document").ready(function(){
-				
+				sizeSVG();
+
 				//D3 vars
 				var svg = d3.select("#svg2");
-				
+
 				var wifi = new Array();
 				wifi[0] = d3.select("#floorG-ani");
 				wifi[1] = d3.select("#floor1-ani");
 				wifi[2] = d3.select("#floor2-ani");
 				wifi[3] = d3.select("#floor3-ani");
-				
+
 				//Time vars
 				//JS Time
-				var startTime; 
-				var currentTime; 
-				var endTime; 
+				var startTime;
+				var currentTime;
+				var endTime;
 				//Unix Time
-				var start; 
+				var start;
 				var end;
 				//Scale
 				var scale = 1;
 				//Intervals
 				var intv = 10;
 				var ajaxIntv = 1*60*60 //Set up a new load for every 1 hour of data
-				
+
+				<?php
+				 if(!$select)
+					{
+						?>
+						var lStart = <?php print $start; ?>;
+						var lEnd = <?php print $end; ?>;
+
+						console.log(lStart + " to " + lEnd);
+
+							mainStart(lStart,lEnd);
+							$("#control-container").hide();
+						<?php
+					}
+				 ?>
+
 				$("#startBtn").click(function()
 				{
 					var lStart = strtotime($("#startTime").val()) + 9*60*60*1000;
 					var lEnd = strtotime($("#endTime").val()) + 60*60*21*1000;
 					console.log(lStart + " to " + lEnd);
-					
+
 					mainStart(lStart,lEnd);
 					$("#control-container").hide();
 				});
-				
-				
+
+
 				/* main */
 				displayFloors();
-				
+
 				function mainStart(startT, endT)
-				{	
+				{
 					setTimeVars(startT, endT)
 					startAnimation(start, end);
 				}
-				
-				
-				
+
+
+
 				function setTimeVars(startT, endT)
 				{
 					//Time vars
 					//Scale
-					 scale = (endT - startT) / (15 * 60 * 1000)
+					 scale = (endT - startT) / (5 * 60 * 1000);
 					//JS Time
 					 startTime = getScaledTime(startT);
 					 currentTime = getScaledTime(startT);
@@ -82,12 +108,12 @@ require_once "control.php";
 					//Unix Time
 					 start = startT/1000;
 					 end = endT/1000;
-					 
+
 					 console.log(startTime + " to " + endTime);
 
 				}
-				
-				
+
+
 				//Setup AJAX
 				function startAnimation(start, end)
 				{
@@ -99,7 +125,7 @@ require_once "control.php";
 							start: t,
 							end: t + ajaxIntv * 1.5 //For a little overlap in the animation to make it transition smoother
 						}).done(function(data) {
-							
+
 							if(data.start == start) //We can start the animation
 							{
 								startTick();
@@ -113,7 +139,7 @@ require_once "control.php";
 						});
 					}
 				}
-				
+
 				/* Animation functions */
 				//Start the clock
 				function startTick()
@@ -127,7 +153,7 @@ require_once "control.php";
 						{
 							clearInterval(timeTick);
 						}
-						
+
 					}
 					,intv);
 				}
@@ -149,14 +175,14 @@ require_once "control.php";
 					//Remove old clients
 					var ageLimit = 60*60; //1 hr of inactivity
 					var old = d3.selectAll(".client").filter(function(d,i){
-						if(data.start - d3.select(this).attr("age") >= ageLimit) return true; 
+						if(data.start - d3.select(this).attr("age") >= ageLimit) return true;
 						return false;
 					});
 					console.log("removing " + old[0].length + " clients");
 					old.style('opacity',0);
-					
+
 					var nClients = data.clients.length;
-					//Start by setting up 
+					//Start by setting up
 					var d3Clients = [];
 					var color;
 					//console.log(data);
@@ -176,20 +202,20 @@ require_once "control.php";
 							color = getColor(cma, cmnh);
 							d3.select("#client" + data.clients[c].id).style('fill',color).attr('cma',cma).attr('cmnh', cmnh).style("opacity",1);
 						}
-						
-						
+
+
 						var dlength = data.clients[c].data.length;
-						
+
 						for(var d = 0; d < dlength; d++)
 						{
 
 
 
-							d3.select("#client" + data.clients[c].id).transition().delay(getScaledTime(data.clients[c].data[d].delay * 1000)).duration(getScaledTime(data.clients[c].data[d].duration * 1000)).ease('linear').attrTween('transform',moveClient(data.clients[c].data[d].route, data.clients[c].data[d].rev, data.clients[c].data[d].floor1, data.clients[c].data[d].floor2)).attr('path',data.clients[c].data[d].route).attr('age',parseFloat(data.start) + parseFloat(data.clients[c].data[d].delay) );							
+							d3.select("#client" + data.clients[c].id).transition().delay(getScaledTime(data.clients[c].data[d].delay * 1000)).duration(getScaledTime(data.clients[c].data[d].duration * 1000)).ease('linear').attrTween('transform',moveClient(data.clients[c].data[d].route, data.clients[c].data[d].rev, data.clients[c].data[d].floor1, data.clients[c].data[d].floor2)).attr('path',data.clients[c].data[d].route).attr('age',parseFloat(data.start) + parseFloat(data.clients[c].data[d].delay) );
 						}
 					}
 				}
-				
+
 				/* Move the client across floors */
 				function moveClientFloor(clientID, newFloor)
 				{
@@ -205,9 +231,9 @@ require_once "control.php";
 							console.log(e);
 						}
 
-				
+
 				}
-				
+
 				/* get the dot color */
 				function getColor(cma,cmnh)
 				{
@@ -227,7 +253,7 @@ require_once "control.php";
 					{
 						return "rgba(255,151,0,0.5)";
 					}
-				
+
 				}
 				//colorSky();
 				function colorSky()
@@ -241,7 +267,7 @@ require_once "control.php";
 							var d = new Date(getRealTime(currentTime));
 							var h = d.getHours();
 							var color;
-							
+
 							if(h + csHrs <= 6)//Dawn
 							{
 								color = "rgb(16,59,97)";
@@ -268,37 +294,37 @@ require_once "control.php";
 							}
 							//console.log(color);
 							d3.select("#svgHolder").transition().duration(csIntv).style('background-color',color);
-							
+
 					},csIntv);
-					
+
 				}
-				
-				
+
+
 				//Move the client
 				function moveClient(path, rev, ffrom, fto)
 				{
-				
+
 					var nPath = svg.select('path#' + path).node();
-					
+
 					if(nPath === null)
 					{
 						console.log('No Path Found: ' + path);
 						return;
 					}
-					
+
 					var l = nPath.getTotalLength();
 
-					
-					
+
+
 					return function(d, i, a) {
-					
+
 						d3.select(this).attr('path',path);
 						d3.select(this).attr('reverse',rev);
-						
+
 						var id = d3.select(this).attr("id");
 
 						var cFlr = d3.select(this).attr('floor'); //current floor
-						
+
 						var dFloor;  //change in floors
 						if(rev)
 						{
@@ -308,7 +334,7 @@ require_once "control.php";
 						{
 							dFloor = ffrom - fto;
 						}
-						
+
 						//if(cFlr != ffrom) //If the client isn't on the starting floor
 						//{
 							moveClientFloor(id, ffrom);
@@ -321,7 +347,7 @@ require_once "control.php";
 						//t = time (0 - 1)
 							var pos;
 							var time;
-							
+
 							if(rev)
 							{
 								time = (1-t);
@@ -331,19 +357,19 @@ require_once "control.php";
 								time = t;
 							}
 							pos = l*time;
-							
+
 							var p = nPath.getPointAtLength(pos);
 							var x = p.x;
 							var y = p.y;
-							
+
 							d3.select('#' + id).attr('time',t);
 							if(time >= 0.5)
 							{
 								//y += -70*(dFloor);
-							}							
+							}
 							if(t >= 0.5)
 							{
-								if(ffrom != fto && change) //ffrom != fto && 
+								if(ffrom != fto && change) //ffrom != fto &&
 								{
 									change = false;
 									moveClientFloor(id, fto); //Change floors 1/2 way
@@ -354,20 +380,20 @@ require_once "control.php";
 								x = fuzz(x);
 								y = fuzz(y);
 							}
-							
-							
-							
+
+
+
 							return "translate(" + x  + "," + y  + ")";//Move marker
 						}
 					}
-				
+
 				}
-				
+
 				function fuzz(val)
 				{
 					var fVal = 7
 					return val - fVal + 2 * fVal * Math.random(); // +/- 7 px
-					
+
 				}
 
 				/* Mouse over area */
@@ -390,13 +416,13 @@ require_once "control.php";
 					});
 				}
 
-				
-		
-				
-				
-				
-				
-				
+
+
+
+
+
+
+
 				/* D3 client icons */
 				dispClientCounts();
 				function dispClientCounts()
@@ -410,7 +436,7 @@ require_once "control.php";
 					var bothText = d3.select("#colorIndicators").append("text");
 					bothText.attr("x",both.attr("cx")).attr("y",both.attr("cy")).attr("title",both.attr("title")).attr("text-anchor","middle").attr("dominant-baseline", "central").attr('fill','black').attr("font-family", "sans-serif").attr("font-size", "14px").text('0').attr('class','counterText').attr("stroke-width",0);
 					bothText.append("svg:title").text("Visitors of both museums");
-					
+
 					//CMA
 					color = getColor(1,0);
 					var cma = d3.select("#cCMA")
@@ -418,7 +444,7 @@ require_once "control.php";
 					var cmaText = d3.select("#colorIndicators").append("text");
 					cmaText.attr("x",cma.attr("cx")).attr("y",cma.attr("cy") ).attr("title",cma.attr("title")).attr("text-anchor","middle").attr("dominant-baseline", "central").attr('fill','black').attr("font-family", "sans-serif").attr("font-size", "14px").text('0').attr('class','counterText').attr("stroke-width",0);
 					cmaText.append("svg:title").text("Visitors of CMOA only");
-					
+
 					//CMNH
 					color = getColor(0,1);
 					var cmnh = d3.select("#cCMNH")
@@ -426,7 +452,7 @@ require_once "control.php";
 					var cmnhText = d3.select("#colorIndicators").append("text");
 					cmnhText.attr("x",cmnh.attr("cx")).attr("y",cmnh.attr("cy") ).attr("title",cmnh.attr("title")).attr("text-anchor","middle").attr("dominant-baseline", "central").attr('fill','white').attr("font-family", "sans-serif").attr("font-size", "14px").text('0').attr('class','counterText').attr("stroke-width",0);
 					cmnhText.append("svg:title").text("Visitors of CMNH only");
-					
+
 					//Neither
 					color = getColor(0,0);
 					var neither = d3.select("#cNeither")
@@ -434,73 +460,73 @@ require_once "control.php";
 					var neitherText = d3.select("#colorIndicators").append("text");
 					neitherText.attr("x",neither.attr("cx")).attr("y",neither.attr("cy") ).attr("text-anchor","middle").attr("dominant-baseline", "central").attr('fill','black').attr("font-family", "sans-serif").attr("font-size", "14px").text('0').attr('class','counterText').attr("stroke-width",0);
 					neitherText.append("svg:title").text("Visitors of neither museum");
-					
+
 					var cliCount = setInterval(function ()
 					{
 
 						var cBoth = d3.selectAll(".client").filter(function(d,i){
-						if(d3.select(this).attr("cma") >= 1 && d3.select(this).attr("cmnh") >= 1) return true; 
+						if(d3.select(this).attr("cma") >= 1 && d3.select(this).attr("cmnh") >= 1) return true;
 						return false;
 						});
 						bothText.text(cBoth[0].length );
-						
+
 						var cCMA = d3.selectAll(".client").filter(function(d,i){
-						if(d3.select(this).attr("cma") >= 1 && d3.select(this).attr("cmnh") == 0) return true; 
+						if(d3.select(this).attr("cma") >= 1 && d3.select(this).attr("cmnh") == 0) return true;
 						return false;
 						});
 						cmaText.text(cCMA[0].length);
-						
+
 						var cCMNH = d3.selectAll(".client").filter(function(d,i){
-						if(d3.select(this).attr("cma") == 0 && d3.select(this).attr("cmnh") >= 1) return true; 
+						if(d3.select(this).attr("cma") == 0 && d3.select(this).attr("cmnh") >= 1) return true;
 						return false;
 						});
 						cmnhText.text(cCMNH[0].length);
-						
+
 						var cNei = d3.selectAll(".client").filter(function(d,i){
-						if(d3.select(this).attr("cma") == 0 && d3.select(this).attr("cmnh") == 0) return true; 
+						if(d3.select(this).attr("cma") == 0 && d3.select(this).attr("cmnh") == 0) return true;
 						return false;
 						});
 						neitherText.text(cNei[0].length);
 						iIntv = ccIntv;
-					
-					
+
+
 					},iIntv);
-					
-					
-					
-					
+
+
+
+
 				}
 
-				
-				
+
+
 				/* Displaying the floors */
-						
-				
+
+
 				function displayFloors()
 				{
-					
+
 					var floors = ['floorG','floor1','floor2','floor3']
 					for(var i = 0; i < 4; i++)
 					{
 						var floor = d3.select('#' + floors[i]).remove();
 						svg.append('g').attr('id',floors[i] + '-move');
-						
+
 						d3.select('#' + floors[i] + '-move').append(function() { return floor.node(); });
-						
+
 						isometric('#' + floors[i]);
-						
+
 						var y = getFloorDis(i);
 						//console.log(i + ' = ' + y);
 						 d3.select('#' + floors[i] + '-move').attr('transform', ' translate(-70,' + y + ')');
 					}
 				}
-				
-				
+
+
 				function getFloorDis(floor)
 				{
 					return 90*(3 - floor) - 120;
 				}
-				
+
 				function changeFloor(flr, dur)
 				{
 					var floors = ['#floorG-move','#floor1-move','#floor2-move','#floor3-move']
@@ -510,8 +536,8 @@ require_once "control.php";
 						var y = 90*((flr)-i) - 120;
 						f.attr('display',null);
 						f.transition().duration(dur).attr('transform', ' translate(-70,' + y + ')').style('opacity',1);
-						
-						
+
+
 					}
 					if(flr < 3)
 					{
@@ -520,31 +546,31 @@ require_once "control.php";
 							var f = d3.select(floors[i]);
 							f.transition().duration(dur).style('opacity',0).each('end',function(){ f.attr('display','none');});
 						}
-					
+
 					}
 				}
-				
+
 				function isometric(select)
 				{
 					var obj = d3.select(select);
-					
+
 					var bbox = obj.node().getBBox();
-					
+
 					var midX = bbox.width / 2.0;
 					var midY = bbox.height / 2.0;
-					
+
 					var t = obj.attr('transform');
 					//.transition().duration(dur)
 					// matrix(0.707 0.409 -0.707 0.409 0 -0.816)
-					
-					
+
+
 					obj.attr("transform", t + "translate(" + midX + "," + midY +")  matrix(0.9063077870366499, 0.24421318475056708, -0.42261826174069944, 0.5237168647772704, 0, -0.8161375900801602) translate(" + -1*midX + "," + -1*midY +")");
-					
-					
-				
+
+
+
 				}
-				
-				
+
+
 				var floor = 3;
 				$('#upBtn').click(function()
 				{
@@ -553,7 +579,7 @@ require_once "control.php";
 					console.log(floor);
 					changeFloor(floor,1000);
 				});
-				
+
 				$('#downBtn').click(function()
 				{
 					floor--;
@@ -561,7 +587,7 @@ require_once "control.php";
 					console.log(floor);
 					changeFloor(floor,1000);
 				});
-				
+
 				svg.selectAll('#floorBtns').selectAll('g').on('mousedown',function(d,i)
 				{
 					d3.select(this).selectAll('circle').attr('fill','silver');
@@ -569,7 +595,7 @@ require_once "control.php";
 				{
 					d3.select(this).selectAll('circle').attr('fill','white');
 				})
-				
+
 				/*.on('mouseout',function(d,i)
 				{
 					d3.select(this).attr('fill',1);
@@ -578,7 +604,7 @@ require_once "control.php";
 					d3.select(this).attr('fill',1);
 				});
 				*/
-			
+
 						//Datepicker
 		$('#control-container .input-daterange').datepicker({
 			startDate: "<?php print getStart(); ?>",
@@ -586,17 +612,21 @@ require_once "control.php";
 			todayHighlight: true
 		});
 
-							var aspect = 1366 / 900,
-				chart = $("#svg2");
-			$(window).on("resize", function() {
+
+			$(window).on("resize", sizeSVG);
+
+			function sizeSVG()
+			{
+				var chart = $("#svg2");
+				var aspect = 1366 / 900;
 				var targetWidth = chart.parent().width();
 				chart.attr("width", targetWidth);
 				chart.attr("height", targetWidth / aspect);
-			});
-			
+			}
 
-			
-			
+
+
+
 
 			/* Time functions */
 			function strtotime(string)
@@ -607,7 +637,7 @@ require_once "control.php";
 			{
 				return time * scale;
 			}
-			
+
 			function getScaledTime(time)
 			{
 				return time  / scale;
@@ -622,14 +652,34 @@ require_once "control.php";
 		    var hour = a.getHours();
 		    var min = a.getMinutes();
 		    var sec = a.getSeconds();
-			
-			
-			
-			
-		    var time = dow(a) +", " + month + ' ' + date + ' ' + year + ' ' + padTime(hour) + ':' + padTime(min) + ':' + padTime(sec) ;
+				var ampm;
+
+				if(hour == 0)
+				{
+					hour = 12;
+					ampm = "am";
+				}
+				else if(hour < 12)
+				{
+					ampm = "am";
+				}
+				else if(hour == 12)
+				{
+					ampm = "pm";
+				}
+				else
+				{
+						hour = hour - 12;
+						ampm = "pm";
+				}
+
+
+
+
+		    var time = dow(a) +", " + month + ' ' + date + ' ' + year + ' ' + hour + ':' + padTime(min) + ':' + padTime(sec) + ' ' + ampm;
 		    return time;
 		}
-		
+
 		function padTime(value)
 		{
 			if(value >= 10)
@@ -642,7 +692,7 @@ require_once "control.php";
 			}
 			return '00';
 		}
-		
+
 		function dow(date)
 		{
 			var weekday = new Array(7);
@@ -657,13 +707,13 @@ require_once "control.php";
 			var n = weekday[date.getDay()];
 			return n;
 		}
-		
+
 
 		}); //End jQ main
-			
+
 		</script>
 		<style>
-			#svgHolder 
+			#svgHolder
 			{
 				position:absolute;
 				top:1%;
@@ -674,7 +724,7 @@ require_once "control.php";
 			#time
 			{
 
-				
+
 			}
 			#controls
 			{
@@ -695,7 +745,7 @@ require_once "control.php";
 					<span class="glyphicon glyphicon-play" aria-hidden="true"></span> Play
 				</button>
 			</div>
-		</div>	
+		</div>
 		<div id ='svgHolder' class="">
 			<?php echo file_get_contents('map.svg'); ?>
 		</div>
